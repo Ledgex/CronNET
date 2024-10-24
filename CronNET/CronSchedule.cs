@@ -73,26 +73,27 @@ namespace CronNET
         {
             if (!isValid()) return;
 
-            MatchCollection matches = validation_regex.Matches(this._expression);
+            // 09/26/2024 Paul.  Ranged separated by comma does not work with validation_regex. 
+            string[] matches = this._expression.Split(' ');
 
             generate_minutes(matches[0].ToString());
 
-            if (matches.Count > 1)
+            if (matches.Length > 1)
                 generate_hours(matches[1].ToString());
             else
                 generate_hours("*");
             
-            if (matches.Count > 2)
+            if (matches.Length > 2)
                 generate_days_of_month(matches[2].ToString());
             else
                 generate_days_of_month("*");
             
-            if (matches.Count > 3)
+            if (matches.Length > 3)
                 generate_months(matches[3].ToString());
             else
                 generate_months("*");
             
-            if (matches.Count > 4)
+            if (matches.Length > 4)
                 generate_days_of_weeks(matches[4].ToString());
             else
                 generate_days_of_weeks("*");
@@ -125,6 +126,9 @@ namespace CronNET
 
         private List<int> generate_values(string configuration, int start, int max)
         {
+            // 09/26/2024 Paul.  A list can contain a range. 
+            if (configuration.Contains(",")) return list_array(configuration);
+
             if (divided_regex.IsMatch(configuration)) return divided_array(configuration, start, max);
             if (range_regex.IsMatch(configuration)) return range_array(configuration);
             if (wild_regex.IsMatch(configuration)) return wild_array(configuration, start, max);
@@ -201,7 +205,17 @@ namespace CronNET
             string[] split = configuration.Split(",".ToCharArray());
 
             foreach (string s in split)
-                ret.Add(int.Parse(s));
+            {
+                // 09/26/2024 Paul.  A list can contain a range. 
+                if (s.Contains("-"))
+                {
+                    ret.AddRange(range_array(s));
+                }
+                else
+                {
+                    ret.Add(int.Parse(s));
+                }
+            }
 
             return ret;
         }

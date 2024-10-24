@@ -43,6 +43,8 @@ namespace CronTests
             var cs = new CronSchedule("1-10/3 20-45/4 * * *");
             results = cs.minutes;
             Assert.AreEqual(results.ToArray(), new int[] { 3, 6, 9 });
+            var multistyle = new CronSchedule("1-5,6-10 * * * *");
+            Assert.AreEqual(multistyle.minutes.ToArray(), new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         }
 
         [Test]
